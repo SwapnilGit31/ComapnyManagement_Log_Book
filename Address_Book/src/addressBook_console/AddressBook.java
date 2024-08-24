@@ -22,7 +22,7 @@ public class AddressBook {
         int choice;
 
         do{
-            System.out.println("Employee Details : ");
+            System.out.println("Employee Details - Select Option: ");
             System.out.println("1. Add Employee");
             System.out.println("2. Display Employee");
             System.out.println("3. Update Employee");
