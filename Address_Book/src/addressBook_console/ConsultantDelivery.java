@@ -52,6 +52,11 @@ public class ConsultantDelivery extends Employee{
     @Override
     public String toString() {
         return "ConsultantDelivery{" +
+                "empID='" +getempId()+'\'' +
+                "Name='" +getempName()+'\'' +
+                "Comapny Name='" +getempCompanyName()+'\'' +
+                "Blood Group='" +getempBloodGroup()+'\'' +
+                "Address='" +getAddress()+'\'' +
                 "GCMLevel='" + GCMLevel + '\'' +
                 ", dassId='" + dassId + '\'' +
                 ", consultingLevel='" + consultingLevel + '\'' +

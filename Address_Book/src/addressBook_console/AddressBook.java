@@ -198,6 +198,8 @@ public  class AddressBook {
         System.out.println("Enter consulting level: ");
         String consultingLevel = scanner.nextLine();
 
+        System.out.println("Enter how many project you have led?");
+
         List<String> leadProjects = Arrays.asList(scanner.nextLine().split(","));
         return new ConsultantDelivery(empId,empCompanyName,empName,empBloodGroup,address,gcmLevel,dassId,consultingLevel,leadProjects);
 
