@@ -61,6 +61,11 @@ public class AssociateConsultantDelivery extends Employee{
     @Override
     public String toString() {
         return "AssociateConsultantDelivery{" +
+                "empID='" +getempId()+'\'' +
+                "Name='" +getempName()+'\'' +
+                "Comapny Name='" +getempCompanyName()+'\'' +
+                "Blood Group='" +getempBloodGroup()+'\'' +
+                "Address='" +getAddress()+'\'' +
                 "GCMLevel='" + GCMLevel + '\'' +
                 ", dassId='" + dassId + '\'' +
                 ", skillSet=" + skillSet +
