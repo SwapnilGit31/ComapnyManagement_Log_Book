@@ -7,6 +7,9 @@ public class Employee {
     private String empBloodGroup;
     private Address address;
 
+    public Employee(int empId, String empName, String empCompanyName, String empBloodGroup) {
+    }
+
     public int getempId() {
         return empId;
     }
@@ -66,5 +69,10 @@ public class Employee {
                 ", address=" + address +
                 '}';
     }
+
+
+
+// Similarly update toString() for ConsultantDelivery and AssociateConsultantDelivery
+
 
 }

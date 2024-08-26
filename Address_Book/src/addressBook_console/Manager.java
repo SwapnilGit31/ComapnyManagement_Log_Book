@@ -41,7 +41,7 @@ public class Manager extends Employee{
 
 
     public Manager(int empId, String empName, String empCompanyName, String empBloodGroup, Address address, String GCMLevel, String dassId, String teamSize, String location) {
-        super(empId, empName, empCompanyName, empBloodGroup, address);
+        super(empId, empName, empCompanyName, empBloodGroup);
         this.GCMLevel = GCMLevel;
         this.dassId = dassId;
         this.teamSize = teamSize;

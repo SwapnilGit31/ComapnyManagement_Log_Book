@@ -42,7 +42,7 @@ public class ConsultantDelivery extends Employee{
     }
 
     public ConsultantDelivery(int empId, String empName, String empCompanyName, String empBloodGroup, Address address, String GCMLevel, String dassId, String consultingLevel, List<String> leadProjects) {
-        super(empId, empName, empCompanyName, empBloodGroup, address);
+        super(empId, empName, empCompanyName, empBloodGroup);
         this.GCMLevel = GCMLevel;
         this.dassId = dassId;
         this.consultingLevel = consultingLevel;

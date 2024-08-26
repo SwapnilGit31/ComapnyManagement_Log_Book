@@ -50,7 +50,7 @@ public class AssociateConsultantDelivery extends Employee{
     }
 
     public AssociateConsultantDelivery(int empId, String empName, String empCompanyName, String empBloodGroup, Address address, String GCMLevel, String dassId, List<String> skillSet, String reportsTo, String projectRole) {
-        super(empId, empName, empCompanyName, empBloodGroup, address);
+        super(empId, empName, empCompanyName, empBloodGroup);
         this.GCMLevel = GCMLevel;
         this.dassId = dassId;
         this.skillSet = skillSet;
