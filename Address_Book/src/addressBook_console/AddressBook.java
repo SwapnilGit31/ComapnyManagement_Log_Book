@@ -25,7 +25,7 @@ public  class AddressBook {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
 
-    public static Map<Integer, Employee> addressBook = new HashMap<Integer, Employee>();
+    //public static Map<Integer, Employee> addressBook = new HashMap<Integer, Employee>();
     static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -92,7 +92,7 @@ public  class AddressBook {
 
                 employee.setAddress(address);
 
-                addressBook.put(empId, employee);
+               // addressBook.put(empId, employee);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -199,11 +199,11 @@ public  class AddressBook {
 
         Employee employee = createEmployee(type, empId, empName, empCompanyName, empBloodGroup, address);
 
-        addressBook.put(empId, employee);
+        //addressBook.put(empId, employee);
 
 
         if (employee != null) {
-            addressBook.put(empId, employee);
+           // addressBook.put(empId, employee);
             System.out.println(type + "Employee Added Successfully");
         } else {
             System.out.println(type + " Invalid Employee Type");
@@ -433,6 +433,7 @@ public  class AddressBook {
                 Employee employee = new Employee(empId, empName, empCompanyName, empBloodGroup, address);
 
                 // Print or return the employee details
+                System.out.println("------------------------------");
                 System.out.println("Employee ID: " + empId);
                 System.out.println("Employee Name: " + empName);
                 System.out.println("Company Name: " + empCompanyName);
@@ -450,7 +451,7 @@ public  class AddressBook {
                 System.out.println("City: " + city);
                 System.out.println("Pin Code: " + pinCode);
                 System.out.println("Mobile Number: " + mobNo);
-                System.out.println("----------");
+                System.out.println("------------------------------");
 
                 hasResults = true;
             }
@@ -462,9 +463,6 @@ public  class AddressBook {
             e.printStackTrace();
         }
     }
-
-
-
     private static Employee createEmployeeFromResultSet(ResultSet rs) throws SQLException {
         int empId = rs.getInt("empId");
         String empName = rs.getString("empName");
@@ -490,7 +488,6 @@ public  class AddressBook {
             e.printStackTrace();
         }
     }
-
 
     private static void updateEmployee() throws InvalidIDException, SQLException {
         System.out.print("\nEnter Employee ID to update: ");
@@ -532,9 +529,6 @@ public  class AddressBook {
         }
         return false;
     }
-
-
-
     private static void updateEmployeeFields(Employee employee, int updateChoice) {
         switch (updateChoice) {
             case 1:
@@ -667,10 +661,6 @@ public  class AddressBook {
         }
     }
 
-
-
-
-
     private static Address getAddressFromResultSet(ResultSet rs) throws SQLException {
         // Extract the values from the ResultSet based on the available columns
         String buildingName = rs.getString("buildingName");
@@ -758,7 +748,6 @@ public  class AddressBook {
             System.out.println("Invalid Choice.");
         }
 
-
     }
 
     private static void deleteEmployee(String type) throws InvalidIDException {
@@ -791,14 +780,6 @@ public  class AddressBook {
             System.out.println("Exception Occurred: " + e.getMessage());
         }
     }
-
-
-
-
-        // Check if the type matches (adjust based on how type is stored in Employee)
-
-
-
     private static void deleteEmployeeFromDatabase(int empId) throws SQLException {
         // SQL query to delete employee from the database
         String deleteEmployeeSql = "DELETE FROM employees WHERE empId = ?";
@@ -811,7 +792,6 @@ public  class AddressBook {
             deleteAddressFromDatabase(empId);
         }
     }
-
     private static void deleteAddressFromDatabase(int empId) throws SQLException {
         // SQL query to delete address associated with the employee
         String deleteAddressSql = "DELETE FROM address WHERE empId = ?";
@@ -821,7 +801,6 @@ public  class AddressBook {
             pstmt.executeUpdate();
         }
     }
-
     private static boolean isMatchingType(Employee employee, String type) {
         // Implement logic to check if the employee matches the type (e.g., Consultant, Associate, etc.)
         // This method should be adapted based on how types are distinguished
