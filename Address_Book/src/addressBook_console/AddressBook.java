@@ -1,21 +1,16 @@
 package addressBook_console;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.util.*;
-
 class InvalidIDException extends Exception{
     public InvalidIDException(String msg){
         super(msg);
     }
-
 }
-
 public  class AddressBook {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/companywgs";
     private static final String DB_USER = "root";  // Replace with your MySQL username
@@ -24,10 +19,7 @@ public  class AddressBook {
     private static Connection connect() throws SQLException {
         return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
-
-    //public static Map<Integer, Employee> addressBook = new HashMap<Integer, Employee>();
     static Scanner scanner = new Scanner(System.in);
-
     public static void main(String[] args) {
         int choice;
         do {
@@ -62,13 +54,10 @@ public  class AddressBook {
                     break;
                 default:
                     System.out.println("Invalid choice");
-
             }
 
         } while (choice != 5);
     }
-
-
     private static void loadAllEmployees() {
         String query = "SELECT e.*, a.buildingName, a.city, a.pinCode, a.mobNo " +
                 "FROM Employee e " +
@@ -98,8 +87,6 @@ public  class AddressBook {
             e.printStackTrace();
         }
     }
-
-
     private static void manageEmployees(String type) {
         int operation;
         do {
@@ -146,15 +133,12 @@ public  class AddressBook {
         } while (operation != 5);
 
     }
-
-
     private static void addEmployee(String type) {
         System.out.println("Enter Employee Details :");
         System.out.println("-------------------------");
         System.out.println("Enter Employee ID");
         int empId = scanner.nextInt();
         scanner.nextLine();
-
         String checkQuery = "SELECT COUNT(*) FROM Employee WHERE empId = ?";
         try (Connection conn = connect();
              PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
@@ -181,7 +165,6 @@ public  class AddressBook {
         System.out.println("Address Details");
         System.out.println("------------------");
 
-
         System.out.println("Enter Building Name :");
         String building_Name = scanner.nextLine();
 
@@ -191,7 +174,6 @@ public  class AddressBook {
         System.out.println("Enter pinCode :");
         String pinCode = scanner.nextLine();
 
-
         System.out.println("Enter Employee Mobile No : :");
         String mobNo = scanner.nextLine();
 
@@ -199,11 +181,7 @@ public  class AddressBook {
 
         Employee employee = createEmployee(type, empId, empName, empCompanyName, empBloodGroup, address);
 
-        //addressBook.put(empId, employee);
-
-
         if (employee != null) {
-           // addressBook.put(empId, employee);
             System.out.println(type + "Employee Added Successfully");
         } else {
             System.out.println(type + " Invalid Employee Type");
@@ -283,8 +261,6 @@ public  class AddressBook {
                 employeeStmt.setString(16, address.getPinCode());
                 employeeStmt.setString(17, address.getMobNo());
             }
-
-
             employeeStmt.executeUpdate();
             String addressSQL = "INSERT INTO Address (empId, buildingName, city, pinCode, mobNo) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement addressStmt = conn.prepareStatement(addressSQL)) {
@@ -295,14 +271,10 @@ public  class AddressBook {
                 addressStmt.setString(5, address.getMobNo());
                 addressStmt.executeUpdate();
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
     }
-
-
     private static Employee createEmployee(String type, int empId, String empName, String empCompanyName, String empBloodGroup, Address address) {
         switch (type) {
             case "General":
@@ -317,8 +289,6 @@ public  class AddressBook {
                 return null;
         }
     }
-
-
     private static Employee createManager(int empId, String empName, String empCompanyName, String empBloodGroup, Address address) {
         System.out.println("Enter GCM level: ");
         String gcmLevel = scanner.nextLine();
@@ -335,8 +305,6 @@ public  class AddressBook {
         return new Manager(empId, empName, empCompanyName, empBloodGroup, new Address("", "", "", ""), gcmLevel, dassId, teamSize, location);
 
     }
-
-
     private static Employee createConsultantDelivery(int empId, String empName, String empCompanyName, String empBloodGroup, Address address) {
         System.out.println("Enter GCM level: ");
         String gcmLevel = scanner.nextLine();
@@ -351,10 +319,7 @@ public  class AddressBook {
 
         List<String> leadProjects = Arrays.asList(scanner.nextLine().split(","));
         return new ConsultantDelivery(empId, empCompanyName, empName, empBloodGroup, new Address("", "", "", ""), gcmLevel, dassId, consultingLevel, leadProjects);
-
-
     }
-
     private static Employee createAssociateConsultantDelivery(int empId, String empName, String empCompanyName, String empBloodGroup, Address address) {
         System.out.println("Enter GCM level: ");
         String gcmLevel = scanner.nextLine();
@@ -372,10 +337,7 @@ public  class AddressBook {
         String projectRole = scanner.nextLine();
 
         return new AssociateConsultantDelivery(empId, empName, empCompanyName, empBloodGroup, new Address("", "", "", ""), gcmLevel, dassId, skillSet, reportsTo, projectRole);
-
     }
-
-
     private static void displayAllEmployees(String type) {
         // Construct base query
         String query = "SELECT e.empId, e.empName, e.empCompanyName, e.empBloodGroup, " +
@@ -385,7 +347,6 @@ public  class AddressBook {
                 "FROM employee e " +
                 "LEFT JOIN address a ON e.empId = a.empId WHERE 1=1"; // Use WHERE 1=1 to facilitate appending additional conditions
 
-        // Append specific conditions based on employee type
         switch (type) {
             case "General":
                 query += " AND teamSize IS NULL AND consultingLevel IS NULL AND skillSet IS NULL";
@@ -403,7 +364,6 @@ public  class AddressBook {
                 System.out.println("Invalid employee type.");
                 return;
         }
-
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
@@ -428,11 +388,9 @@ public  class AddressBook {
                 String pinCode = rs.getString("pinCode");
                 String mobNo = rs.getString("mobNo");
 
-                // Create Address and Employee objects
                 Address address = new Address(buildingName, city, pinCode, mobNo);
                 Employee employee = new Employee(empId, empName, empCompanyName, empBloodGroup, address);
 
-                // Print or return the employee details
                 System.out.println("------------------------------");
                 System.out.println("Employee ID: " + empId);
                 System.out.println("Employee Name: " + empName);
@@ -455,7 +413,6 @@ public  class AddressBook {
 
                 hasResults = true;
             }
-
             if (!hasResults) {
                 System.out.println("No Employees found of type: " + type);
             }
@@ -473,8 +430,6 @@ public  class AddressBook {
 
         return new Employee(empId, empName, empCompanyName, empBloodGroup, address);
     }
-
-
     // Example usage
     public void fetchEmployees() {
         String query = "SELECT * FROM Employee"; // Adjust query as needed
@@ -488,7 +443,6 @@ public  class AddressBook {
             e.printStackTrace();
         }
     }
-
     private static void updateEmployee() throws InvalidIDException, SQLException {
         System.out.print("\nEnter Employee ID to update: ");
         int empId = scanner.nextInt();
@@ -499,8 +453,6 @@ public  class AddressBook {
         if (!exists) {
             throw new InvalidIDException("Employee ID does not exist.");
         }
-
-        // Select the field to update
         System.out.println("\nSelect the field to update:");
         System.out.println("------------------------------");
         System.out.println("1. Employee Name");
@@ -514,7 +466,6 @@ public  class AddressBook {
         int updateChoice = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
-        // Perform the update
         updateEmployeeInDatabase(empId, updateChoice);
     }
 
@@ -580,8 +531,6 @@ public  class AddressBook {
                 break;
         }
     }
-
-
     private static void updateEmployeeInDatabase(int empId, int updateChoice) throws SQLException {
         String sql = "";
         switch (updateChoice) {
@@ -660,7 +609,6 @@ public  class AddressBook {
                 break;
         }
     }
-
     private static Address getAddressFromResultSet(ResultSet rs) throws SQLException {
         // Extract the values from the ResultSet based on the available columns
         String buildingName = rs.getString("buildingName");
@@ -671,8 +619,6 @@ public  class AddressBook {
         // Assuming Address class has a constructor matching the columns available
         return new Address(buildingName, city, pinCode, mobNo);
     }
-
-
     private static void updateSpecificFields(Employee employee, int updateChoice, Scanner scanner) {
         if (employee instanceof Manager) {
             Manager manager = (Manager) employee;
@@ -747,24 +693,18 @@ public  class AddressBook {
         } else {
             System.out.println("Invalid Choice.");
         }
-
     }
-
     private static void deleteEmployee(String type) throws InvalidIDException {
         System.out.print("Enter Employee ID to delete: ");
         int empId = scanner.nextInt();
         scanner.nextLine();
-
-        // Fetch employee from addressBook
         try {
-            // First, delete related records from the address table
             String deleteAddressQuery = "DELETE FROM address WHERE empId = ?";
             try (PreparedStatement preparedStatement = connect().prepareStatement(deleteAddressQuery)) {
                 preparedStatement.setInt(1, empId);
                 preparedStatement.executeUpdate();
             }
 
-            // Then, delete the employee record
             String deleteEmployeeQuery = "DELETE FROM Employee WHERE empId = ?";
             try (PreparedStatement preparedStatement = connect().prepareStatement(deleteEmployeeQuery)) {
                 preparedStatement.setInt(1, empId);
@@ -788,12 +728,10 @@ public  class AddressBook {
             pstmt.setInt(1, empId);
             pstmt.executeUpdate();
 
-            // Optionally, also delete the associated address if needed
             deleteAddressFromDatabase(empId);
         }
     }
     private static void deleteAddressFromDatabase(int empId) throws SQLException {
-        // SQL query to delete address associated with the employee
         String deleteAddressSql = "DELETE FROM address WHERE empId = ?";
 
         try (PreparedStatement pstmt = connect().prepareStatement(deleteAddressSql)) {
@@ -802,8 +740,6 @@ public  class AddressBook {
         }
     }
     private static boolean isMatchingType(Employee employee, String type) {
-        // Implement logic to check if the employee matches the type (e.g., Consultant, Associate, etc.)
-        // This method should be adapted based on how types are distinguished
         return employee.getType().equalsIgnoreCase(type);
     }
 }
