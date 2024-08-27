@@ -75,6 +75,7 @@ public class Employee {
                 '}';
     }
 
+
     public String getType() {
         return type;
     }

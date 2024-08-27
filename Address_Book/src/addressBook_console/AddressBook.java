@@ -377,8 +377,15 @@ public  class AddressBook {
 
 
     private static void displayAllEmployees(String type) {
-        String query = "SELECT * FROM Employee e JOIN Address a ON e.empId = a.empId WHERE 1=1";
+        // Construct base query
+        String query = "SELECT e.empId, e.empName, e.empCompanyName, e.empBloodGroup, " +
+                "e.gcmLevel, e.dassId, e.teamSize, e.location, e.consultingLevel, " +
+                "e.leadProjects, e.skillSet, e.reportsTo, e.projectRole, " +
+                "a.buildingName, a.city, a.pinCode, a.mobNo " +
+                "FROM employee e " +
+                "LEFT JOIN address a ON e.empId = a.empId WHERE 1=1"; // Use WHERE 1=1 to facilitate appending additional conditions
 
+        // Append specific conditions based on employee type
         switch (type) {
             case "General":
                 query += " AND teamSize IS NULL AND consultingLevel IS NULL AND skillSet IS NULL";
@@ -416,11 +423,35 @@ public  class AddressBook {
                 String skillSet = rs.getString("skillSet");
                 String reportsTo = rs.getString("reportsTo");
                 String projectRole = rs.getString("projectRole");
+                String buildingName = rs.getString("buildingName");
+                String city = rs.getString("city");
+                String pinCode = rs.getString("pinCode");
+                String mobNo = rs.getString("mobNo");
 
-                Employee employee = createEmployeeFromResultSet(rs);
+                // Create Address and Employee objects
+                Address address = new Address(buildingName, city, pinCode, mobNo);
+                Employee employee = new Employee(empId, empName, empCompanyName, empBloodGroup, address);
 
-                System.out.println(employee);
+                // Print or return the employee details
+                System.out.println("Employee ID: " + empId);
+                System.out.println("Employee Name: " + empName);
+                System.out.println("Company Name: " + empCompanyName);
+                System.out.println("Blood Group: " + empBloodGroup);
+                System.out.println("GCM Level: " + gcmLevel);
+                System.out.println("DASS ID: " + dassId);
+                System.out.println("Team Size: " + teamSize);
+                System.out.println("Location: " + location);
+                System.out.println("Consulting Level: " + consultingLevel);
+                System.out.println("Lead Projects: " + leadProjects);
+                System.out.println("Skill Set: " + skillSet);
+                System.out.println("Reports To: " + reportsTo);
+                System.out.println("Project Role: " + projectRole);
+                System.out.println("Building Name: " + buildingName);
+                System.out.println("City: " + city);
+                System.out.println("Pin Code: " + pinCode);
+                System.out.println("Mobile Number: " + mobNo);
                 System.out.println("----------");
+
                 hasResults = true;
             }
 
@@ -431,6 +462,7 @@ public  class AddressBook {
             e.printStackTrace();
         }
     }
+
 
 
     private static Employee createEmployeeFromResultSet(ResultSet rs) throws SQLException {
