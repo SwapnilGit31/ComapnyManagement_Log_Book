@@ -70,7 +70,9 @@ public  class AddressBook {
 
 
     private static void loadAllEmployees() {
-        String query = "SELECT * FROM Employee";
+        String query = "SELECT e.*, a.buildingName, a.city, a.pinCode, a.mobNo " +
+                "FROM Employee e " +
+                "JOIN Address a ON e.empId = a.empId";
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
@@ -80,19 +82,15 @@ public  class AddressBook {
                 String empName = rs.getString("empName");
                 String empCompanyName = rs.getString("empCompanyName");
                 String empBloodGroup = rs.getString("empBloodGroup");
-                String gcmLevel = rs.getString("gcmLevel");
-                String dassId = rs.getString("dassId");
-                String teamSize = rs.getString("teamSize");
-                String location = rs.getString("location");
-                String consultingLevel = rs.getString("consultingLevel");
-                String leadProjects = rs.getString("leadProjects");
-                String skillSet = rs.getString("skillSet");
-                String reportsTo = rs.getString("reportsTo");
-                String projectRole = rs.getString("projectRole");
+                String buildingName = rs.getString("buildingName");
+                String city = rs.getString("city");
+                String pinCode = rs.getString("pinCode");
+                String mobNo = rs.getString("mobNo");
 
+                Address address = new Address(buildingName, city, pinCode, mobNo);
+                Employee employee = createEmployeeFromResultSet(rs); // This should match the method definition
 
-                Employee employee = new Employee(empId, empName, empCompanyName, empBloodGroup
-                );
+                employee.setAddress(address);
 
                 addressBook.put(empId, employee);
             }
@@ -100,6 +98,7 @@ public  class AddressBook {
             e.printStackTrace();
         }
     }
+
 
     private static void manageEmployees(String type) {
         int operation;
@@ -125,8 +124,8 @@ public  class AddressBook {
                     break;
                 case 3:
                     try {
-                        updateEmployee(type);
-                    } catch (InvalidIDException e) {
+                        updateEmployee();
+                    } catch (InvalidIDException | SQLException e) {
                         System.out.println("Exception Occured:  " + e.getMessage());
                     }
                     break;
@@ -155,6 +154,20 @@ public  class AddressBook {
         System.out.println("Enter Employee ID");
         int empId = scanner.nextInt();
         scanner.nextLine();
+
+        String checkQuery = "SELECT COUNT(*) FROM Employee WHERE empId = ?";
+        try (Connection conn = connect();
+             PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+            checkStmt.setInt(1, empId);
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next() && rs.getInt(1) > 0) {
+                System.out.println("Employee with ID " + empId + " already exists. Please use a different ID.");
+                return;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
 
         System.out.println("Enter Employee Name");
         String empName = scanner.nextLine();
@@ -196,18 +209,18 @@ public  class AddressBook {
             System.out.println(type + " Invalid Employee Type");
         }
 
-        String employeeSQL = "INSERT INTO Employee (empId, empName, empCompanyName, empBloodGroup, gcmLevel, dassId, teamSize, location, consultingLevel, leadProjects, skillSet, reportsTo, projectRole) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String employeeSQL = "INSERT INTO Employee (empId, empName, empCompanyName, empBloodGroup, gcmLevel, dassId, teamSize, location, consultingLevel, leadProjects, skillSet, reportsTo, projectRole, buildingName, city, pinCode, mobNo) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 
         try (Connection conn = connect();
              PreparedStatement employeeStmt = conn.prepareStatement(employeeSQL)) {
 
             // Insert into Employee table
-            employeeStmt.setInt(1, employee.getempId());
-            employeeStmt.setString(2, employee.getempName());
-            employeeStmt.setString(3, employee.getempCompanyName());
-            employeeStmt.setString(4, employee.getempBloodGroup());
+            employeeStmt.setInt(1, employee.getEmpId());
+            employeeStmt.setString(2, employee.getEmpName());
+            employeeStmt.setString(3, employee.getEmpCompanyName());
+            employeeStmt.setString(4, employee.getEmpBloodGroup());
 
             if (employee instanceof Manager) {
                 Manager manager = (Manager) employee;
@@ -220,6 +233,10 @@ public  class AddressBook {
                 employeeStmt.setNull(11, java.sql.Types.VARCHAR); // skillSet
                 employeeStmt.setNull(12, java.sql.Types.VARCHAR); // reportsTo
                 employeeStmt.setNull(13, java.sql.Types.VARCHAR); // projectRole
+                employeeStmt.setString(14, address.getBuildingName());
+                employeeStmt.setString(15, address.getCity());
+                employeeStmt.setString(16, address.getPinCode());
+                employeeStmt.setString(17, address.getMobNo());
             } else if (employee instanceof ConsultantDelivery) {
                 ConsultantDelivery consultantDelivery = (ConsultantDelivery) employee;
                 employeeStmt.setString(5, consultantDelivery.getGCMLevel());
@@ -231,6 +248,10 @@ public  class AddressBook {
                 employeeStmt.setNull(11, java.sql.Types.VARCHAR); // skillSet
                 employeeStmt.setNull(12, java.sql.Types.VARCHAR); // reportsTo
                 employeeStmt.setNull(13, java.sql.Types.VARCHAR); // projectRole
+                employeeStmt.setString(14, address.getBuildingName());
+                employeeStmt.setString(15, address.getCity());
+                employeeStmt.setString(16, address.getPinCode());
+                employeeStmt.setString(17, address.getMobNo());
             } else if (employee instanceof AssociateConsultantDelivery) {
                 AssociateConsultantDelivery associateConsultantDelivery = (AssociateConsultantDelivery) employee;
                 employeeStmt.setString(5, associateConsultantDelivery.getGCMLevel());
@@ -242,6 +263,10 @@ public  class AddressBook {
                 employeeStmt.setString(11, String.join(",", associateConsultantDelivery.getSkillSet()));
                 employeeStmt.setString(12, associateConsultantDelivery.getReportsTo());
                 employeeStmt.setString(13, associateConsultantDelivery.getProjectRole());
+                employeeStmt.setString(14, address.getBuildingName());
+                employeeStmt.setString(15, address.getCity());
+                employeeStmt.setString(16, address.getPinCode());
+                employeeStmt.setString(17, address.getMobNo());
             } else {
                 // General Employee
                 employeeStmt.setNull(5, java.sql.Types.VARCHAR); // gcmLevel
@@ -253,9 +278,23 @@ public  class AddressBook {
                 employeeStmt.setNull(11, java.sql.Types.VARCHAR); // skillSet
                 employeeStmt.setNull(12, java.sql.Types.VARCHAR); // reportsTo
                 employeeStmt.setNull(13, java.sql.Types.VARCHAR); // projectRole
+                employeeStmt.setString(14, address.getBuildingName());
+                employeeStmt.setString(15, address.getCity());
+                employeeStmt.setString(16, address.getPinCode());
+                employeeStmt.setString(17, address.getMobNo());
             }
 
+
             employeeStmt.executeUpdate();
+            String addressSQL = "INSERT INTO Address (empId, buildingName, city, pinCode, mobNo) VALUES (?, ?, ?, ?, ?)";
+            try (PreparedStatement addressStmt = conn.prepareStatement(addressSQL)) {
+                addressStmt.setInt(1, employee.getEmpId());
+                addressStmt.setString(2, address.getBuildingName());
+                addressStmt.setString(3, address.getCity());
+                addressStmt.setString(4, address.getPinCode());
+                addressStmt.setString(5, address.getMobNo());
+                addressStmt.executeUpdate();
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -338,7 +377,8 @@ public  class AddressBook {
 
 
     private static void displayAllEmployees(String type) {
-        String query = "SELECT * FROM Employee WHERE 1=1";
+        String query = "SELECT * FROM Employee e JOIN Address a ON e.empId = a.empId WHERE 1=1";
+
         switch (type) {
             case "General":
                 query += " AND teamSize IS NULL AND consultingLevel IS NULL AND skillSet IS NULL";
@@ -377,10 +417,7 @@ public  class AddressBook {
                 String reportsTo = rs.getString("reportsTo");
                 String projectRole = rs.getString("projectRole");
 
-                //  Address address = new Address(/* Set address details from the database if applicable */);
-
-                Employee employee = createEmployeeForm(empId, empName, empCompanyName, empBloodGroup,
-                        gcmLevel, dassId, teamSize, location, consultingLevel, leadProjects, skillSet, reportsTo, projectRole);
+                Employee employee = createEmployeeFromResultSet(rs);
 
                 System.out.println(employee);
                 System.out.println("----------");
@@ -396,46 +433,45 @@ public  class AddressBook {
     }
 
 
+    private static Employee createEmployeeFromResultSet(ResultSet rs) throws SQLException {
+        int empId = rs.getInt("empId");
+        String empName = rs.getString("empName");
+        String empCompanyName = rs.getString("empCompanyName");
+        String empBloodGroup = rs.getString("empBloodGroup");
 
-    private static Employee createEmployeeForm(
-            int empId, String empName, String empCompanyName, String empBloodGroup,
-            String gcmLevel, String dassId, String teamSize, String location,
-            String consultingLevel, String leadProjects, String skillSet,
-            String reportsTo, String projectRole) {
+        Address address = getAddressFromResultSet(rs); // Assuming address data is also available
 
-        if (gcmLevel != null && dassId != null) {
-            if (teamSize != null && location != null) {
-                return new Manager(empId, empName, empCompanyName, empBloodGroup,
-                        new Address("", "", "", ""), gcmLevel, dassId, teamSize, location);
-            } else if (consultingLevel != null && leadProjects != null) {
-                List<String> leadProjectsList = Arrays.asList(leadProjects.split(","));
-                return new ConsultantDelivery(empId, empCompanyName, empName, empBloodGroup,
-                        new Address("", "", "", ""), gcmLevel, dassId, consultingLevel, leadProjectsList);
-            } else if (skillSet != null && reportsTo != null && projectRole != null) {
-                List<String> skillSetList = Arrays.asList(skillSet.split(","));
-                return new AssociateConsultantDelivery(empId, empName, empCompanyName, empBloodGroup,
-                        new Address("", "", "", ""), gcmLevel, dassId, skillSetList, reportsTo, projectRole);
-            }
-        }
-        return new Employee(empId, empName, empCompanyName, empBloodGroup, new Address("", "", "", ""));
+        return new Employee(empId, empName, empCompanyName, empBloodGroup, address);
     }
 
 
+    // Example usage
+    public void fetchEmployees() {
+        String query = "SELECT * FROM Employee"; // Adjust query as needed
+        try (ResultSet rs = (ResultSet) DatabaseConnection.getConnection(query)) {
+            while (rs.next()) {
+                Employee employee = createEmployeeFromResultSet(rs);
+                // Process employee as needed
+                System.out.println(employee);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 
-
-    private static void updateEmployee(String type)throws InvalidIDException{
+    private static void updateEmployee() throws InvalidIDException, SQLException {
         System.out.print("\nEnter Employee ID to update: ");
         int empId = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
+        // Check if the employee exists
+        boolean exists = checkEmployeeExists(empId);
+        if (!exists) {
+            throw new InvalidIDException("Employee ID does not exist.");
+        }
 
-
-        Employee employee = Optional.ofNullable(addressBook.get(empId))
-                .filter(emp -> isMatchingType(emp, type))
-                .orElseThrow(() -> new InvalidIDException("Employee ID does not exist or does not match the selected type."));
-
-        // Update base fields
+        // Select the field to update
         System.out.println("\nSelect the field to update:");
         System.out.println("------------------------------");
         System.out.println("1. Employee Name");
@@ -446,67 +482,172 @@ public  class AddressBook {
         System.out.println("6. Pin Code");
         System.out.println("7. Mobile Number");
 
-        if (employee instanceof Manager) {
-            System.out.println("8. GCM Level");
-            System.out.println("9. DASS ID");
-            System.out.println("10. Team Size");
-            System.out.println("11. Location");
-        } else if (employee instanceof ConsultantDelivery) {
-            System.out.println("8. GCM Level");
-            System.out.println("9. DASS ID");
-            System.out.println("10. Consulting Level");
-            System.out.println("11. Lead Projects (comma-separated)");
-        } else if (employee instanceof AssociateConsultantDelivery) {
-            System.out.println("8. GCM Level");
-            System.out.println("9. DASS ID");
-            System.out.println("10. Skill Set (comma-separated)");
-            System.out.println("11. Reports To");
-            System.out.println("12. Project Role");
-        }
-
-        System.out.print("Enter choice: ");
         int updateChoice = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
+        // Perform the update
+        updateEmployeeInDatabase(empId, updateChoice);
+    }
+
+    private static boolean checkEmployeeExists(int empId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM employee WHERE empId = ?";
+        try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+            pstmt.setInt(1, empId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
+
+
+
+    private static void updateEmployeeFields(Employee employee, int updateChoice) {
         switch (updateChoice) {
             case 1:
                 System.out.print("Enter new Employee Name: ");
-                employee.setempName(scanner.nextLine());
+                employee.setEmpName(scanner.nextLine());
                 break;
             case 2:
                 System.out.print("Enter new Employee Company Name: ");
-                employee.setempCompanyName(scanner.nextLine());
+                employee.setEmpCompanyName(scanner.nextLine());
                 break;
             case 3:
                 System.out.print("Enter new Employee Blood Group: ");
-                employee.setempBloodGroup(scanner.nextLine());
+                employee.setEmpBloodGroup(scanner.nextLine());
+                break;
+            case 4:
+                if (employee.getAddress() != null) {
+                    System.out.print("Enter new Building Name: ");
+                    employee.getAddress().setBuildingName(scanner.nextLine());
+                } else {
+                    System.out.println("Address not found for this employee.");
+                }
+                break;
+            case 5:
+                if (employee.getAddress() != null) {
+                    System.out.print("Enter new City Name: ");
+                    employee.getAddress().setCity(scanner.nextLine());
+                } else {
+                    System.out.println("Address not found for this employee.");
+                }
+                break;
+            case 6:
+                if (employee.getAddress() != null) {
+                    System.out.print("Enter new Pin Code: ");
+                    employee.getAddress().setPinCode(scanner.nextLine());
+                } else {
+                    System.out.println("Address not found for this employee.");
+                }
+                break;
+            case 7:
+                if (employee.getAddress() != null) {
+                    System.out.print("Enter new Mobile Number: ");
+                    employee.getAddress().setMobNo(scanner.nextLine());
+                } else {
+                    System.out.println("Address not found for this employee.");
+                }
+                break;
+            default:
+                System.out.println("Invalid choice. Please select a valid option.");
+                break;
+        }
+    }
+
+
+    private static void updateEmployeeInDatabase(int empId, int updateChoice) throws SQLException {
+        String sql = "";
+        switch (updateChoice) {
+            case 1:
+                System.out.print("Enter new Employee Name: ");
+                String newName = scanner.nextLine();
+                sql = "UPDATE employee SET empName = ? WHERE empId = ?";
+                try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+                    pstmt.setString(1, newName);
+                    pstmt.setInt(2, empId);
+                    pstmt.executeUpdate();
+                }
+                break;
+            case 2:
+                System.out.print("Enter new Employee Company Name: ");
+                String newCompanyName = scanner.nextLine();
+                sql = "UPDATE employee SET empCompanyName = ? WHERE empId = ?";
+                try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+                    pstmt.setString(1, newCompanyName);
+                    pstmt.setInt(2, empId);
+                    pstmt.executeUpdate();
+                }
+                break;
+            case 3:
+                System.out.print("Enter new Employee Blood Group: ");
+                String newBloodGroup = scanner.nextLine();
+                sql = "UPDATE employee SET empBloodGroup = ? WHERE empId = ?";
+                try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+                    pstmt.setString(1, newBloodGroup);
+                    pstmt.setInt(2, empId);
+                    pstmt.executeUpdate();
+                }
                 break;
             case 4:
                 System.out.print("Enter new Building Name: ");
-                employee.getAddress().setbuildingName(scanner.nextLine());
+                String newBuildingName = scanner.nextLine();
+                sql = "UPDATE address SET buildingName = ? WHERE empId = ?";
+                try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+                    pstmt.setString(1, newBuildingName);
+                    pstmt.setInt(2, empId);
+                    pstmt.executeUpdate();
+                }
                 break;
             case 5:
                 System.out.print("Enter new City Name: ");
-                employee.getAddress().setCity(scanner.nextLine());
+                String newCity = scanner.nextLine();
+                sql = "UPDATE address SET city = ? WHERE empId = ?";
+                try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+                    pstmt.setString(1, newCity);
+                    pstmt.setInt(2, empId);
+                    pstmt.executeUpdate();
+                }
                 break;
             case 6:
                 System.out.print("Enter new Pin Code: ");
-                employee.getAddress().setpinCode(scanner.nextLine());
+                String newPinCode = scanner.nextLine();
+                sql = "UPDATE address SET pinCode = ? WHERE empId = ?";
+                try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+                    pstmt.setString(1, newPinCode);
+                    pstmt.setInt(2, empId);
+                    pstmt.executeUpdate();
+                }
                 break;
             case 7:
                 System.out.print("Enter new Mobile Number: ");
-                employee.getAddress().setmobNo(scanner.nextLine());
+                String newMobNo = scanner.nextLine();
+                sql = "UPDATE address SET mobNo = ? WHERE empId = ?";
+                try (PreparedStatement pstmt = connect().prepareStatement(sql)) {
+                    pstmt.setString(1, newMobNo);
+                    pstmt.setInt(2, empId);
+                    pstmt.executeUpdate();
+                }
                 break;
             default:
-                updateSpecificFields(employee, updateChoice, scanner);
+                System.out.println("Invalid choice. Please select a valid option.");
                 break;
         }
+    }
 
 
 
-        System.out.println("Employee details updated successfully!");
 
 
+    private static Address getAddressFromResultSet(ResultSet rs) throws SQLException {
+        // Extract the values from the ResultSet based on the available columns
+        String buildingName = rs.getString("buildingName");
+        String city = rs.getString("city");
+        String pinCode = rs.getString("pinCode");
+        String mobNo = rs.getString("mobNo");
+
+        // Assuming Address class has a constructor matching the columns available
+        return new Address(buildingName, city, pinCode, mobNo);
     }
 
 
@@ -588,29 +729,71 @@ public  class AddressBook {
 
     }
 
-    private static void deleteEmployee(String type)throws InvalidIDException{
+    private static void deleteEmployee(String type) throws InvalidIDException {
         System.out.print("Enter Employee ID to delete: ");
         int empId = scanner.nextInt();
         scanner.nextLine();
 
-        Employee employee=Optional.ofNullable(addressBook.get(empId)).filter(emp->isMatchingType(emp,type)).orElseThrow(() -> new InvalidIDException("Employee ID does not exist for the selected type."));
-        addressBook.remove(empId);
-        System.out.println(type+ "Employee Deleted Successfully");
+        // Fetch employee from addressBook
+        try {
+            // First, delete related records from the address table
+            String deleteAddressQuery = "DELETE FROM address WHERE empId = ?";
+            try (PreparedStatement preparedStatement = connect().prepareStatement(deleteAddressQuery)) {
+                preparedStatement.setInt(1, empId);
+                preparedStatement.executeUpdate();
+            }
 
-    }
+            // Then, delete the employee record
+            String deleteEmployeeQuery = "DELETE FROM Employee WHERE empId = ?";
+            try (PreparedStatement preparedStatement = connect().prepareStatement(deleteEmployeeQuery)) {
+                preparedStatement.setInt(1, empId);
+                int rowsAffected = preparedStatement.executeUpdate();
 
-    private static boolean isMatchingType(Employee emp, String type) {
-        switch (type) {
-            case "General":
-                return emp.getClass() == Employee.class;
-            case "Manager":
-                return emp instanceof Manager;
-            case "Consultant Delivery":
-                return emp instanceof ConsultantDelivery;
-            case "Associate Consultant Delivery":
-                return emp instanceof AssociateConsultantDelivery;
-            default:
-                return false;
+                if (rowsAffected > 0) {
+                    System.out.println("Employee Deleted Successfully");
+                } else {
+                    System.out.println("Employee ID does not exist.");
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("Exception Occurred: " + e.getMessage());
         }
     }
+
+
+
+
+        // Check if the type matches (adjust based on how type is stored in Employee)
+
+
+
+    private static void deleteEmployeeFromDatabase(int empId) throws SQLException {
+        // SQL query to delete employee from the database
+        String deleteEmployeeSql = "DELETE FROM employees WHERE empId = ?";
+
+        try (PreparedStatement pstmt = connect().prepareStatement(deleteEmployeeSql)) {
+            pstmt.setInt(1, empId);
+            pstmt.executeUpdate();
+
+            // Optionally, also delete the associated address if needed
+            deleteAddressFromDatabase(empId);
+        }
+    }
+
+    private static void deleteAddressFromDatabase(int empId) throws SQLException {
+        // SQL query to delete address associated with the employee
+        String deleteAddressSql = "DELETE FROM address WHERE empId = ?";
+
+        try (PreparedStatement pstmt = connect().prepareStatement(deleteAddressSql)) {
+            pstmt.setInt(1, empId);
+            pstmt.executeUpdate();
+        }
+    }
+
+    private static boolean isMatchingType(Employee employee, String type) {
+        // Implement logic to check if the employee matches the type (e.g., Consultant, Associate, etc.)
+        // This method should be adapted based on how types are distinguished
+        return employee.getType().equalsIgnoreCase(type);
+    }
 }
+

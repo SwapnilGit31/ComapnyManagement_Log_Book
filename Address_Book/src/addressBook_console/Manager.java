@@ -51,10 +51,10 @@ public class Manager extends Employee{
     @Override
     public String toString() {
         return "Manager{" +
-                "empID='" +getempId()+'\'' +
-                "Name='" +getempName()+'\'' +
-                "Comapny Name='" +getempCompanyName()+'\'' +
-                "Blood Group='" +getempBloodGroup()+'\'' +
+                "empID='" +getEmpId()+'\'' +
+                "Name='" +getEmpName()+'\'' +
+                "Comapny Name='" +getEmpCompanyName()+'\'' +
+                "Blood Group='" +getEmpBloodGroup()+'\'' +
                 "Address='" +getAddress()+'\'' +
                 "GCMLevel='" + GCMLevel + '\'' +
                 ", dassId='" + dassId + '\'' +

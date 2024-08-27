@@ -1,32 +1,26 @@
-package addressBook_console;
 
+package addressBook_console;
 public class Address {
     private String buildingName;
-    private String pinCode;
     private String city;
+    private String pinCode;
     private String mobNo;
 
-    public Address(String building_Name, String city, String pinCode, String mobNo) {
-        this.buildingName = building_Name;
+    // Constructor
+    public Address(String buildingName, String city, String pinCode, String mobNo) {
+        this.buildingName = buildingName;
         this.city = city;
         this.pinCode = pinCode;
         this.mobNo = mobNo;
     }
 
-    public String getbuildingName() {
+    // Getters and Setters
+    public String getBuildingName() {
         return buildingName;
     }
 
-    public void setbuildingName(String building_Name) {
-        this.buildingName = building_Name;
-    }
-
-    public String getpinCode() {
-        return pinCode;
-    }
-
-    public void setpinCode(String pinCode) {
-        this.pinCode = pinCode;
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
     }
 
     public String getCity() {
@@ -37,20 +31,28 @@ public class Address {
         this.city = city;
     }
 
-    public String getmobNo() {
+    public String getPinCode() {
+        return pinCode;
+    }
+
+    public void setPinCode(String pinCode) {
+        this.pinCode = pinCode;
+    }
+
+    public String getMobNo() {
         return mobNo;
     }
 
-    public void setmobNo(String mobNo) {
+    public void setMobNo(String mobNo) {
         this.mobNo = mobNo;
     }
 
     @Override
     public String toString() {
         return "Address{" +
-                "building_Name='" + buildingName + '\'' +
+                "buildingName='" + buildingName + '\'' +
                 ", city='" + city + '\'' +
-                ", pinCode='" + pinCode + '\''+
+                ", pinCode='" + pinCode + '\'' +
                 ", mobNo='" + mobNo + '\'' +
                 '}';
     }

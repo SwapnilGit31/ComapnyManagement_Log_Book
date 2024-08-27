@@ -9,7 +9,7 @@ public class DatabaseConnection {
     private static final String USER = "root";
     private static final String PASSWORD = "Swapnil@31";
 
-    public static Connection getConnection() {
+    public static Connection getConnection(String query) {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(URL, USER, PASSWORD);
@@ -22,6 +22,7 @@ public class DatabaseConnection {
     }
 
     public static void main(String[] args) {
-        getConnection();
+        String query = "";
+        getConnection(query);
     }
 }
